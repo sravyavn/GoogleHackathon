@@ -8,7 +8,7 @@ from tavily import TavilyClient
 dotenv.load_dotenv()
 api_key = os.getenv("API_KEY")
 genai.configure(api_key=api_key)
-tavily_api_key = st.secrets["TAVILY_API_KEY"]
+tavily_api_key = st.secrets["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"]
 model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
 
 st.set_page_config(page_title="Safety Detector", page_icon="🕵️‍♀️", layout="centered")
