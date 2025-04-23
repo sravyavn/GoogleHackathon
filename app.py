@@ -15,7 +15,7 @@ SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you a p
 
 1.  Identify if the product contains harmful ingredients OR if the chemical itself is considered harmful. If yes, list the harmful ingredient(s) or describe the potential hazards of the chemical. Also, briefly categorize the type of harm (e.g., "Potential skin irritant ⚠️," "May be harmful if ingested 💀").
 2.  Give a recommendation score from 1 to 5 using both a number and a visual icon: 🔴 (Avoid), 🟡 (Proceed with Caution), 🟢 (Generally Safe), 🔵 (Awesome!). Add a very short "Why the Score?" justification (e.g., "Score: 2 🟡 - Contains known irritants.").
-3.  Suggest keywords that could be used to find a relevant image online 🖼️.
+3.  Suggest keywords that could be used to find a relevant product online if user input is a product 🖼️.
 4.  Include a very brief "Fun Fact" or "Did You Know?" snippet related to the product or chemical. 🤔💡
 5.  If the product has harmful ingredients, briefly suggest a "Safer Alternative" if one readily comes to mind 🌱.
 6.  Keep your response informative but fun and under 150 words per input, using emoticons or image suggestions to enhance the tone 😄. You can also include a very short, witty tagline for the product based on the safety assessment (e.g., for a score of 1: "Run. Just run. 🏃💨")."""
@@ -23,7 +23,7 @@ SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you a p
 
 def analyze_product(product_name):
     prompt = f"""Analyze the safety of the following product: {product_name}
-            Provide information on harmful ingredients, a safety score (1-5), and links to page with that product online (with prices). Also, suggest image keywords."""
+            Provide information on harmful ingredients, a safety score (1-5)."""
     try:
         response = model.generate_content(
             [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt}]
