@@ -31,6 +31,7 @@ def analyze_product(product_name):
         return response.candidates[0].content.parts[0].text
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
+st.title("Safety Sleuth 🕵️‍♀️ - Your Witty Product Pal")
 
 # Add background color and image styling using inline CSS
 st.markdown("""
@@ -59,8 +60,6 @@ st.image(
     caption="🔍 Ensuring Product Safety, One Scan at a Time",
     use_container_width=True
 )
-
-st.title("Safety Sleuth 🕵️‍♀️ - Your Witty Product Pal")
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
