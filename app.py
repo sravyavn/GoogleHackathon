@@ -41,7 +41,7 @@ st.markdown("""
             padding: 20px;
         }
         .stApp {
-            background-color: #f5fef7;
+            background-color: #c4ff33;
         }
         .banner-img {
             display: block;
