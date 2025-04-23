@@ -10,6 +10,7 @@ api_key = os.getenv("API_KEY")
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
 
+st.set_page_config(page_title="Safety Detector", page_icon="🕵️‍♀️", layout="centered")
 
 SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you product names. For each one:
 
@@ -34,7 +35,6 @@ def analyze_product(product_name):
 
 st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Pal")
 # Set page config for favicon and layout
-st.set_page_config(page_title="Safety Detector", page_icon="🕵️‍♀️", layout="centered")
 
 # Add background color and image styling using inline CSS
 st.markdown("""
