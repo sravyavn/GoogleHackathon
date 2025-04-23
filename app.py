@@ -22,15 +22,33 @@ SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you pro
 
 
 def analyze_product(product_name):
-    prompt = f"""Analyze the safety of the following product: {product_name}
-            Provide information on harmful ingredients, a safety score (1-5), and links to page with that product online (with prices). Also, suggest image keywords."""
+    # Format product name for search URLs
+    search_query = "+".join(product_name.strip().lower().split())
+    walmart_url = f"https://www.walmart.com/search?q={search_query}"
+    target_url = f"https://www.target.com/s?searchTerm={search_query}"
+
+    prompt = f"""
+    Analyze the safety of the following product: {product_name}
+    
+    1. Check if it contains harmful ingredients. If yes, list them.
+    2. Rate it on a scale from 1 (Avoid) to 5 (Safe & Awesome).
+    3. Suggest keywords for a relevant image search.
+    Keep it witty, and under 150 words!
+    """
+
     try:
         response = model.generate_content(
             [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt}]
         )
-        return response.candidates[0].content.parts[0].text
+        result_text = response.candidates[0].content.parts[0].text
+
+        # Append real e-commerce links to the response
+        result_text += f"\n\n🛒 **Shop Now:**\n- [Walmart Link]({walmart_url})\n- [Target Link]({target_url})"
+
+        return result_text
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
+        
 st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Buddy")
 st.markdown(
     "<h4 style='text-align: center; color: gray;'>Drop a product name, and I’ll inspect it like Sherlock—with a safety score and a dash of sass 🔍💁‍♀️</h4>",
@@ -44,7 +62,7 @@ st.markdown("""
             padding: 20px;
         }
         .stApp {
-            background-color: #a5f07e;
+            background-color: #acfa84;
         }
         .banner-img {
             display: block;
