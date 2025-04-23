@@ -67,7 +67,7 @@ st.image(
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
-user_input = st.chat_input("Enter a product name:")
+user_input = st.chat_input("Enter a product or a chemical name:")
 
 if user_input:
     st.session_state["messages"].append({"role": "user", "parts": user_input})
@@ -76,6 +76,6 @@ if user_input:
 
 for message in st.session_state["messages"]:
     if message["role"] == "model":
-        st.markdown(f"**Safety Sleuth:** {message['parts']}", unsafe_allow_html=True)
+        st.markdown(f"**Buddy:** {message['parts']}", unsafe_allow_html=True)
     elif message["role"] == "user":
         st.write(f"**You:** {message['parts']}")
