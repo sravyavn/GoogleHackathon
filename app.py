@@ -57,7 +57,7 @@ st.markdown("""
 # Add banner image
 st.image(
     "https://www.sesotec.com/sites/593fc2aac25e5b0640a20ff8/content_entry5996a921c25e5b2c7874b55f/5e2ace13d1468d59c7c8d814/files/food-safety-lebensmittel-lupe.jpg",
-    caption="🔍 Ensuring Product Safety, One Scan at a Time",
+    caption="🔍 Ensuring Product Safety, One product at a Time",
     use_container_width=True
 )
 
