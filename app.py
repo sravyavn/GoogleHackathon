@@ -32,10 +32,6 @@ def analyze_product(product_name):
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
 
-
-st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Pal")
-# Set page config for favicon and layout
-
 # Add background color and image styling using inline CSS
 st.markdown("""
     <style>
