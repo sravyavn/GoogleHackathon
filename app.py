@@ -31,7 +31,11 @@ def analyze_product(product_name):
         return response.candidates[0].content.parts[0].text
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
-st.title("The Wise Buy Buddy 🕵️‍♀️ - Your Ingredient Safety Checker")
+st.markdown(
+    "<h1 style='text-align: center; color: black;'>The Wise Buy Buddy 🕵️‍♀️ - Your Ingredient Safety Checker</h1>",
+    unsafe_allow_html=True
+)
+
 st.markdown(
     "<h4 style='text-align: center; color: gray;'>Drop a product name, and I’ll inspect it like Sherlock—with a safety score and a dash of sass 🔍💁‍♀️</h4>",
     unsafe_allow_html=True
