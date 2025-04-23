@@ -32,6 +32,38 @@ def analyze_product(product_name):
         return f"Uh oh! Something went wrong: {str(e)}"
 
 
+st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Pal")
+# Set page config for favicon and layout
+st.set_page_config(page_title="Safety Detector", page_icon="🕵️‍♀️", layout="centered")
+
+# Add background color and image styling using inline CSS
+st.markdown("""
+    <style>
+        .main {
+            background-color: #f5fef7;
+            padding: 20px;
+        }
+        .stApp {
+            background-color: #f5fef7;
+        }
+        .banner-img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 60%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Add banner image
+st.image(
+    "https://www.sesotec.com/sites/593fc2aac25e5b0640a20ff8/content_entry5996a921c25e5b2c7874b55f/5e2ace13d1468d59c7c8d814/files/food-safety-lebensmittel-lupe.jpg",
+    caption="🔍 Ensuring Product Safety, One Scan at a Time",
+    use_column_width=True
+)
+
 st.title("Safety Sleuth 🕵️‍♀️ - Your Witty Product Pal")
 
 if "messages" not in st.session_state:
