@@ -32,7 +32,10 @@ def analyze_product(product_name):
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
 st.title("Safety Sleuth 🕵️‍♀️ - Your Witty Product Pal")
-
+st.markdown(
+    "<h4 style='text-align: center; color: gray;'>Drop a product name, and I’ll inspect it like Sherlock—with a safety score and a dash of sass 🔍💁‍♀️</h4>",
+    unsafe_allow_html=True
+)
 # Add background color and image styling using inline CSS
 st.markdown("""
     <style>
