@@ -1,52 +1,37 @@
 import streamlit as st
 import google.generativeai as genai
+import dotenv
 import os
 from PIL import Image
-from tavily import TavilyClient  # Import the Tavily client
 
-# Access your Tavily API key from Streamlit secrets
-TAVILY_API_KEY = st.secrets["TAVILY_API_KEY"]
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
-
-genai.configure(api_key=st.secrets["API_KEY"])
+dotenv.load_dotenv()
+api_key = os.getenv("API_KEY")
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
 
-st.set_page_config(page_title="Safety Detective", page_icon="🕵️‍♀️", layout="centered")
+st.set_page_config(page_title="The Wise Buy Buddy", page_icon="🕵️‍♀️", layout="centered")
+
+SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you a product name OR a chemical name. For each input:
+
+1.  Identify if the product contains harmful ingredients OR if the chemical itself is considered harmful. If yes, list the harmful ingredient(s) or describe the potential hazards of the chemical. Also, briefly categorize the type of harm (e.g., "Potential skin irritant ⚠️," "May be harmful if ingested 💀").
+2.  Give a recommendation score from 1 to 5 using both a number and a visual icon: 🔴 (Avoid), 🟡 (Proceed with Caution), 🟢 (Generally Safe), 🔵 (Awesome!). Add a very short "Why the Score?" justification (e.g., "Score: 2 🟡 - Contains known irritants.").
+3.  Suggest keywords that could be used to find a relevant image online 🖼️.
+4.  Include a very brief "Fun Fact" or "Did You Know?" snippet related to the product or chemical. 🤔💡
+5.  If the product has harmful ingredients, briefly suggest a "Safer Alternative" if one readily comes to mind 🌱.
+6.  Keep your response informative but fun and under 150 words per input, using emoticons or image suggestions to enhance the tone 😄. You can also include a very short, witty tagline for the product based on the safety assessment (e.g., for a score of 1: "Run. Just run. 🏃💨")."""
 
 
 def analyze_product(product_name):
-    prompt_for_gemini = f"""Analyze the safety of the following product: {product_name}
-                    Provide information on harmful ingredients and a safety score (1-5). Also, suggest image keywords."""
-    product_links = []
+    prompt = f"""Analyze the safety of the following product: {product_name}
+            Provide information on harmful ingredients, a safety score (1-5), and links to page with that product online (with prices). Also, suggest image keywords."""
     try:
-        # Search for the product on potential e-commerce sites using Tavily
-        search_results_walmart = tavily_client.search(query=f"{product_name} on Walmart", search_depth="shallow")
-        search_results_target = tavily_client.search(query=f"{product_name} on Target", search_depth="shallow")
-
-        # Extract the first relevant URL if found
-        if search_results_walmart.results:
-            product_links.append(f"[Walmart Link]({search_results_walmart.results[0].url}) - Price: [Fetch Price]") # You'd need another way to fetch the price
-        else:
-            product_links.append("Walmart: Product not easily found.")
-
-        if search_results_target.results:
-            product_links.append(f"[Target Link]({search_results_target.results[0].url}) - Price: [Fetch Price]") # You'd need another way to fetch the price
-        else:
-            product_links.append("Target: Product not easily found.")
-
-        gemini_response = model.generate_content(
-            [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt_for_gemini}]
+        response = model.generate_content(
+            [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt}]
         )
-        safety_analysis = gemini_response.candidates[0].content.parts[0].text
-
-        # Append the links to the Gemini's analysis
-        full_response = f"{safety_analysis}\n\n**Where to Buy:**\n" + "\n".join(product_links)
-        return full_response
-
+        return response.candidates[0].content.parts[0].text
     except Exception as e:
-        return f"Uh oh! Something went wrong while analyzing and searching: {str(e)}"
-
-st.title("Safety Detective 🕵️‍♀️ - Your Witty Product Buddy")
+        return f"Uh oh! Something went wrong: {str(e)}"
+st.title("The Wise Buy Buddy 🕵️‍♀️ - Your Ingredient Safety Checker")
 st.markdown(
     "<h4 style='text-align: center; color: gray;'>Drop a product name, and I’ll inspect it like Sherlock—with a safety score and a dash of sass 🔍💁‍♀️</h4>",
     unsafe_allow_html=True
@@ -91,6 +76,6 @@ if user_input:
 
 for message in st.session_state["messages"]:
     if message["role"] == "model":
-        st.markdown(f"**Safety Detective:** {message['parts']}", unsafe_allow_html=True)
+        st.markdown(f"**Safety Sleuth:** {message['parts']}", unsafe_allow_html=True)
     elif message["role"] == "user":
         st.write(f"**You:** {message['parts']}")
