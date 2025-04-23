@@ -23,7 +23,7 @@ SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you a p
 
 def analyze_product(product_name):
     prompt = f"""Analyze the safety of the following product: {product_name}
-            Provide information on harmful ingredients, a safety score (1-5)."""
+            Provide information on harmful ingredients."""
     try:
         response = model.generate_content(
             [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt}]
