@@ -1,73 +1,52 @@
 import streamlit as st
 import google.generativeai as genai
-import dotenv
 import os
 from PIL import Image
-from tavily import TavilyClient
-import streamlit as st
+from tavily import TavilyClient  # Import the Tavily client
 
-dotenv.load_dotenv()
-api_key = os.getenv("API_KEY")
-genai.configure(api_key=api_key)
-tavily = st.secrets["TAVILY_API_KEY"]
+# Access your Tavily API key from Streamlit secrets
+TAVILY_API_KEY = st.secrets["TAVILY_API_KEY"]
+tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+
+genai.configure(api_key=st.secrets["API_KEY"])
 model = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")
 
-st.set_page_config(page_title="Safety Detector", page_icon="🕵️‍♀️", layout="centered")
-
-SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you product names. For each one:
-
-1.  Check if the product contains harmful ingredients. If yes, list them.
-2.  Give a recommendation score from 1 to 5 (1 = Avoid, 5 = Safe & Awesome).
-3.  Provide links to the product from 2 different e-commerce websites (e.g., Walmart, Target). Include the product name in the URL if possible. State the current price next to each link.
-4.  Suggest keywords that could be used to find a relevant image for this product online.
-5.  Keep your response under 150 words per product. Make it informative but fun with emoticons!"""
-
-def get_product_links(product_name):
-    try:
-        results = tavily.search(
-            query=f"{product_name} site:walmart.com OR site:target.com",
-            search_depth="advanced",
-            max_results=4,
-        )
-        links = [result["url"] for result in results["results"] if any(domain in result["url"] for domain in ["walmart.com", "target.com"])]
-        
-        formatted_links = []
-        for url in links:
-            if "walmart.com" in url:
-                formatted_links.append(f"- 🛒 [View on Walmart]({url})")
-            elif "target.com" in url:
-                formatted_links.append(f"- 🎯 [View on Target]({url})")
-        return "\n".join(formatted_links) if formatted_links else "No direct product links found!"
-    except Exception as e:
-        return f"Couldn't fetch links: {str(e)}"
+st.set_page_config(page_title="Safety Detective", page_icon="🕵️‍♀️", layout="centered")
 
 
 def analyze_product(product_name):
-    prompt = f"""
-    Analyze the safety of the following product: {product_name}
-    
-    1. Check if it contains harmful ingredients. If yes, list them.
-    2. Rate it from 1 (Avoid) to 5 (Safe & Awesome).
-    3. Suggest image search keywords.
-     Keep your response under 150 words per product. Make it informative but fun with emoticons!!
-    """
-
+    prompt_for_gemini = f"""Analyze the safety of the following product: {product_name}
+                    Provide information on harmful ingredients and a safety score (1-5). Also, suggest image keywords."""
+    product_links = []
     try:
-        response = model.generate_content(
-            [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt}]
+        # Search for the product on potential e-commerce sites using Tavily
+        search_results_walmart = tavily_client.search(query=f"{product_name} on Walmart", search_depth="shallow")
+        search_results_target = tavily_client.search(query=f"{product_name} on Target", search_depth="shallow")
+
+        # Extract the first relevant URL if found
+        if search_results_walmart.results:
+            product_links.append(f"[Walmart Link]({search_results_walmart.results[0].url}) - Price: [Fetch Price]") # You'd need another way to fetch the price
+        else:
+            product_links.append("Walmart: Product not easily found.")
+
+        if search_results_target.results:
+            product_links.append(f"[Target Link]({search_results_target.results[0].url}) - Price: [Fetch Price]") # You'd need another way to fetch the price
+        else:
+            product_links.append("Target: Product not easily found.")
+
+        gemini_response = model.generate_content(
+            [{"role": "user", "parts": SYSTEM_PROMPT}, {"role": "user", "parts": prompt_for_gemini}]
         )
-        result_text = response.candidates[0].content.parts[0].text
+        safety_analysis = gemini_response.candidates[0].content.parts[0].text
 
-        # Use Tavily to get real product links
-        product_links = get_product_links(product_name)
-        result_text += f"\n\n🔗 **Where to Buy:**\n{product_links}"
+        # Append the links to the Gemini's analysis
+        full_response = f"{safety_analysis}\n\n**Where to Buy:**\n" + "\n".join(product_links)
+        return full_response
 
-        return result_text
     except Exception as e:
-        return f"Uh oh! Something went wrong: {str(e)}"
+        return f"Uh oh! Something went wrong while analyzing and searching: {str(e)}"
 
-        
-st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Buddy")
+st.title("Safety Detective 🕵️‍♀️ - Your Witty Product Buddy")
 st.markdown(
     "<h4 style='text-align: center; color: gray;'>Drop a product name, and I’ll inspect it like Sherlock—with a safety score and a dash of sass 🔍💁‍♀️</h4>",
     unsafe_allow_html=True
@@ -112,6 +91,6 @@ if user_input:
 
 for message in st.session_state["messages"]:
     if message["role"] == "model":
-        st.markdown(f"**Safety Sleuth:** {message['parts']}", unsafe_allow_html=True)
+        st.markdown(f"**Safety Detective:** {message['parts']}", unsafe_allow_html=True)
     elif message["role"] == "user":
         st.write(f"**You:** {message['parts']}")
