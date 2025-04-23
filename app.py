@@ -1,9 +1,9 @@
-
 import streamlit as st
 import google.generativeai as genai
 import dotenv
 import os
 from PIL import Image
+from tavily import TavilyClient
 
 dotenv.load_dotenv()
 api_key = os.getenv("API_KEY")
@@ -20,20 +20,34 @@ SYSTEM_PROMPT = """You are a witty product-safety assistant! I will give you pro
 4.  Suggest keywords that could be used to find a relevant image for this product online.
 5.  Keep your response under 150 words per product. Make it informative but fun with emoticons!"""
 
+def get_product_links(product_name):
+    try:
+        results = tavily.search(
+            query=f"{product_name} site:walmart.com OR site:target.com",
+            search_depth="advanced",
+            max_results=4,
+        )
+        links = [result["url"] for result in results["results"] if any(domain in result["url"] for domain in ["walmart.com", "target.com"])]
+        
+        formatted_links = []
+        for url in links:
+            if "walmart.com" in url:
+                formatted_links.append(f"- 🛒 [View on Walmart]({url})")
+            elif "target.com" in url:
+                formatted_links.append(f"- 🎯 [View on Target]({url})")
+        return "\n".join(formatted_links) if formatted_links else "No direct product links found!"
+    except Exception as e:
+        return f"Couldn't fetch links: {str(e)}"
+
 
 def analyze_product(product_name):
-    # Format product name for search URLs
-    search_query = "+".join(product_name.strip().lower().split())
-    walmart_url = f"https://www.walmart.com/search?q={search_query}"
-    target_url = f"https://www.target.com/s?searchTerm={search_query}"
-
     prompt = f"""
     Analyze the safety of the following product: {product_name}
     
     1. Check if it contains harmful ingredients. If yes, list them.
-    2. Rate it on a scale from 1 (Avoid) to 5 (Safe & Awesome).
-    3. Suggest keywords for a relevant image search.
-    Keep it witty, and under 150 words!
+    2. Rate it from 1 (Avoid) to 5 (Safe & Awesome).
+    3. Suggest image search keywords.
+     Keep your response under 150 words per product. Make it informative but fun with emoticons!!
     """
 
     try:
@@ -42,12 +56,14 @@ def analyze_product(product_name):
         )
         result_text = response.candidates[0].content.parts[0].text
 
-        # Append real e-commerce links to the response
-        result_text += f"\n\n🛒 **Shop Now:**\n- [Walmart Link]({walmart_url})\n- [Target Link]({target_url})"
+        # Use Tavily to get real product links
+        product_links = get_product_links(product_name)
+        result_text += f"\n\n🔗 **Where to Buy:**\n{product_links}"
 
         return result_text
     except Exception as e:
         return f"Uh oh! Something went wrong: {str(e)}"
+
         
 st.title("Safety Detector 🕵️‍♀️ - Your Witty Product Buddy")
 st.markdown(
