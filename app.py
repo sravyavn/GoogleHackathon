@@ -37,7 +37,7 @@ st.title("Safety Sleuth 🕵️‍♀️ - Your Witty Product Pal")
 st.markdown("""
     <style>
         .main {
-            background-color: #f5fef7;
+            background-color: #9bf8f5;
             padding: 20px;
         }
         .stApp {
